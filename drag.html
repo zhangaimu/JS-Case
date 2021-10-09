@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container {
+            width: 100%;
+            height: 1500px;
+            background-color: #fff;
+            position: relative;
+        }
+
+        .drag-box {
+            width: 150px;
+            height: 150px;
+            background-color: pink;
+            position: fixed;
+            border: 4px solid #000;
+            /* animation: 0.8s animateBorder infinite; */
+        }
+
+
+        @keyframes animateBorder {
+            0% {
+                border: 8px dashed #000;
+            }
+            100%{
+                border: 8px dashed #999;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+    </div>
+    <div class="container">
+        <div>drag</div>
+        <div class="drag-box" style="left:0;top:50%"></div>
+    </div>
+    <script>
+        window.onload = function () {
+            let dragObj = document.getElementsByClassName("drag-box")[0]
+            let dragging = false,
+                mouseX, mouseY, objX, objY, diffX, diffY;
+
+            dragObj.onmousedown = function (event) {
+                dragging = true
+                mouseX = event.clientX;
+                mouseY = event.clientY;
+                objX = dragObj.offsetLeft; //元素的初始位置
+                objY = dragObj.offsetTop;
+                diffX = mouseX - objX; //相当于鼠标距物体左边的距离
+                diffY = mouseY - objY;
+            }
+            dragObj.onmouseover = function (event) {
+                // console.log(event);
+                dragObj.style.cursor = 'move';
+            }
+            dragObj.onmouseleave = function (event) {
+                // console.log(event);
+
+            }
+            document.onmousemove = function (event) {
+                if (dragging) {
+                    dragObj.style.cursor = 'not-allowed';
+                    dragObj.style.borderStyle = 'dashed';
+                    dragObj.style.animationDuration = '0.8s';
+                    dragObj.style.animationName = 'animateBorder';
+                    dragObj.style.animationIterationCount = 'infinite';
+                    dragObj.style.left = event.clientX - mouseX + objX + "px";
+                    dragObj.style.top = event.clientY - mouseY + objY + "px";
+                    //设置边界
+                    if ((event.clientX - diffX) <= 0) { //鼠标到浏览器左边距小于鼠标到obj的左边距
+                        // 左边界
+                        dragObj.style.left = 0 + "px";
+                    }
+                    //window.innerWidth浏览器显示区域的宽度，dragObj.offsetWidth物体宽度
+                    else if ((event.clientX - diffX) > (window.innerWidth - dragObj.offsetWidth)) {
+                        //右边界
+                        dragObj.style.left = window.innerWidth - dragObj.offsetWidth + "px";
+                    }
+                    if ((event.clientY - diffY) <= 0) {
+                        dragObj.style.top = 0 + "px";
+                    } else if ((event.clientY - diffY) > (window.innerHeight - dragObj.offsetHeight)) {
+                        dragObj.style.top = window.innerHeight - dragObj.offsetHeight + "px";
+                    }
+                } else {
+                    dragObj.style.borderStyle = 'solid'; 
+                    dragObj.style.animationName = '';
+                    // console.log("flase")
+                }
+
+            }
+            document.onmouseup = function () {
+                dragging = false;
+                dragObj.style.cursor = 'move';
+            }
+        }
+    </script>
+</body>
+
+</html>

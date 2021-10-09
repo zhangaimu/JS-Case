@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>放烟花</title>
+</head>
+<style>
+    body{
+        background-color: #333;
+    }
+    #container {
+        width: 80%;
+        height: 600px;
+        position: relative;
+        margin: 10px auto;
+        background: black;
+        background-image: url('https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fpic.vjshi.com%2F2019-04-08%2F253130eefe88b45da337781c75cfaab3%2F00004.jpg%3Fx-oss-process%3Dstyle%2Fwatermark&refer=http%3A%2F%2Fpic.vjshi.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1633663039&t=b2d3ed62b3078edeef12bfaa0873a7e3');
+        background-repeat: no-repeat;
+        background-size: 100%;
+    }
+
+    .fire {
+        background: red;
+        position: absolute;
+        /* 设置bottom时,top获取为最大值,减去鼠标点击位置 */
+        bottom: 0px;
+        width: 6px;
+        height: 6px;
+    }
+
+    .small-fire {
+        width: 10px;
+        height: 10px;
+        position: absolute;
+        border-radius: 50%;
+    }
+
+    #toggle{
+        float: right;
+        margin-right:30px;
+        cursor: pointer;
+        color: yellowgreen;
+    }
+
+    #tips{
+        font-size: 20px;
+        color: pink;
+        text-align: center;
+    }
+</style>
+
+<body>
+    <div id="tips">点击图片放烟花</div>
+    <div id="toggle">主题切换</div>
+    <div id="container"></div>
+    <script>
+        var app = document.getElementById('container');
+        app.onclick = (event) => {
+            // console.log(event);
+            let e = event || window.event;
+            // 获取当前点击的坐标
+            var nowPosition = {
+                Y: e.offsetY,
+                X: e.offsetX
+            }
+            new Fire(app, nowPosition);
+        }
+        var toggle = document.getElementById('toggle');
+        var body = document.getElementsByTagName('body')[0];
+        var tips = document.getElementById('tips');
+        var flag = false;
+        toggle.onclick = (event) => {
+            flag = !flag;
+            if(flag){
+                app.style.backgroundImage = 'none';
+                tips.style.color = 'orange';
+                toggle.style.color = 'red';
+                body.style.background = '#fff';
+            }else{
+                tips.style.color = '';
+                toggle.style.color = '';
+                body.style.background = '';
+                app.style.backgroundImage = `url('https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fpic.vjshi.com%2F2019-04-08%2F253130eefe88b45da337781c75cfaab3%2F00004.jpg%3Fx-oss-process%3Dstyle%2Fwatermark&refer=http%3A%2F%2Fpic.vjshi.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1633663039&t=b2d3ed62b3078edeef12bfaa0873a7e3')`
+
+            }
+        }
+
+
+        function Fire(app, nowPosition) {
+            this.app = app;
+            this.nowPosition = nowPosition;
+            this.newDiv = document.createElement('div');
+            this.newDiv.className = 'fire';
+            this.newDiv.style.left = this.nowPosition.X + 'px';
+            this.newDiv.style.background = this.getColor();
+            this.app.appendChild(this.newDiv);
+            // 运动
+            this.move(this.newDiv, {
+                top: this.nowPosition.Y
+            }, () => {
+                this.newDiv.remove();
+                this.smallFire();
+            })
+        }
+
+        //获得一个随机数方法
+        Fire.prototype.rand = function (min, max) {
+            return Math.round(Math.random() * (max - min) + min);
+        }
+
+        //获得一个随机颜色的方法
+        Fire.prototype.getColor = function () {
+            let sum = '#';
+            for (let i = 0; i < 6; i++) {
+                sum += this.rand(0, 15).toString(16)
+            }
+            return sum;
+        }
+
+
+        Fire.prototype.move = function (ele, target, cb) {
+            let times = setInterval(function () {
+                var onOff = true;
+                // 遍历运动的方向和目标
+                for (let attr in target) {
+                    // attr 表示运动的属性
+                    // console.log(attr);
+                    // 获取元素属性的实时值
+                    let tmpVal = parseInt(this.getPos(ele, attr))
+                    // 计算speed
+                    // console.log(tmpVal, attr);
+                    let speed = (target[attr] - tmpVal) / 10;
+                    // 取整
+                    speed = speed > 0 ? Math.ceil(speed) : Math.floor(speed);
+                    // 停止计时器,当一个属性运动到位置,设置开关状态
+                    if (tmpVal == target[attr]) onOff = true;
+                    // 让元素动起来
+                    ele.style[attr] = tmpVal + speed + 'px';
+                }
+
+                // 判断开关状态,清除定时器
+                for (var moveAttr in target) {
+                    // 如果不相等,就说明有属性没有运动到位置,定时器不能停止
+                    if (target[moveAttr] !== parseInt(this.getPos(ele, moveAttr))) {
+                        onOff = false;
+                        break;
+                    }
+                }
+                if (onOff) {
+                    clearInterval(times);
+                    cb && cb();
+                }
+            }.bind(this), 30)
+        }
+        // 获取元素的实时位置的函数
+        Fire.prototype.getPos = function (obj, attr) {
+            if (obj.currentStyle) { // 获取css的样式
+                return obj.currentStyle[attr];
+            } else {
+                return getComputedStyle(obj)[attr]
+            }
+        }
+
+        //小烟花
+        Fire.prototype.smallFire = function () {
+            //首先我们设置小烟花的数量
+            let num = this.rand(50, 60)
+            //遍历 给每一个小烟花设置不同的样式
+            for (let i = 0; i < num; i++) {
+                let sf = document.createElement('div');
+                sf.className = 'small-fire';
+                sf.style.left = this.nowPosition.X + 'px';
+                sf.style.top = this.nowPosition.Y + 'px';
+                sf.style.background = this.getColor();
+                //console.log(sf);
+                //追加到页面中
+                this.app.appendChild(sf);
+                //使小烟花的运动轨迹成圆周运动
+                //给小烟花一个随机的位置，可以是在画布里面的任意一个位置
+                let top = this.rand(0, this.app.offsetHeight - sf.offsetHeight);
+                let left = this.rand(0, this.app.offsetWidth - sf.offsetWidth);
+                //调用运动函数
+                this.move(sf, {
+                    top: top,
+                    left: left
+                }, function () {
+                    sf.remove();
+                })
+            }
+        }
+    </script>
+</body>
+
+</html>

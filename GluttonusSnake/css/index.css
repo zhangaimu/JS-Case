@@ -1,0 +1,79 @@
+body{
+    background-color: lightskyblue;
+}
+/* 容器 */
+.content {
+    width: 640px;
+    height: 600px;
+    margin: 10px auto;
+    position: relative;
+}
+
+/* 按钮容器 */
+.btn {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-color: rgba(0, 0, 0, 0);
+    z-index: 1;
+}
+
+/* 按钮 */
+.btn button {
+    background: none;
+    background-size: 100% 100%;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+}
+
+/* 开始按钮 */
+.startBtn button{
+    width: 200px;
+    height: 150px;
+    background-image: url('../images/btn1.gif');
+    margin: 0 0 -75px -100px;
+}
+/* 暂停按钮 */
+.pauseBtn button{
+    width: 70px;
+    height: 70px;
+    background-image: url('../images/btn4.png');
+    margin: 0 0 -35px -35px;
+}
+.pauseBtn{
+    display: none;
+}
+/* 蛇 */
+#snakeWrap{
+    position: relative;
+    width: 600px;
+    height: 600px;
+    background: yellowgreen;
+    border: 20px solid olivedrab;
+}
+/* 头部 */
+.snakeHead{
+    background-image: url('../images/snake.png');
+    background-size: cover;
+}
+/* 身体 */
+.snakeBody{
+    background-color: pink;
+    border-radius: 50%;
+}
+/* 食物 */
+.food{
+    background: url('../images/food2.png') no-repeat;
+    background-size: 100% 100%;
+}
+.tips{
+    font-size: 20px;
+    color: red;
+    text-align: center;
+}

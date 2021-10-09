@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发弹幕</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .box {
+            background-color: floralwhite;
+            padding: 40px 80px 10px;
+        }
+
+        #screen {
+            background-color: #fff;
+            width: 1200px;
+            height: 500px;
+            border: 1px solid rgb(229, 229, 229);
+            font-size: 14px;
+            margin: 0 auto;
+        }
+
+        .content {
+            border: 1px solid rgb(204, 204, 204);
+            border-radius: 3px;
+            width: 320px;
+            height: 35px;
+            font-size: 14px;
+            margin-top: 30px;
+        }
+
+
+        .send {
+            border: 1px solid rgb(230, 80, 30);
+            color: rgb(230, 80, 0);
+            border-radius: 3px;
+            text-align: center;
+            padding: 0;
+            height: 35px;
+            line-height: 35px;
+            font-size: 14px;
+            width: 159px;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .clear {
+            border: 1px solid;
+            color: darkgray;
+            border-radius: 3px;
+            text-align: center;
+            padding: 0;
+            height: 35px;
+            line-height: 35px;
+            font-size: 14px;
+            width: 159px;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .edit {
+            margin: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .edit .btn {
+            margin-top: 20px;
+        }
+
+        .edit .msg input {
+            padding-left: 5px;
+        }
+
+        .text {
+            position: absolute;
+            font-size: 18px;
+        }
+
+        .dm_box {
+            margin: 30px;
+        }
+
+        video {
+            width: 1200px;
+            height: 500px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <div id="screen">
+            <video id="video"
+                src="https://vd4.bdstatic.com/mda-mj63gt091mxub89e/sc/cae_h264_clips/1633573911386803326/mda-mj63gt091mxub89e.mp4?auth_key=1633688812-0-0-9336cf35d644732c7c1de8f488fa171d&bcevod_channel=searchbox_feed&pd=1&pt=3&abtest="
+                id="my-video" controls autoplay="autoplay">
+            </video>
+            <div class="dm_box">
+
+            </div>
+        </div>
+
+        <div class="edit">
+            <p class="msg">
+                <input placeholder="请输入要发送的弹幕" class="content" type="text" />
+            </p>
+            <p class="btn">
+                <button class="send">发送</button>
+                <button class="clear">清屏</button>
+            </p>
+        </div>
+    </div>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js"></script>
+    <script>
+        // 生成随机颜色 16进制
+        function getRandomColor() {
+            return '#' + (function (color) {
+                return (color += '0123456789abcdef' [Math.floor(Math.random() * 16)]) &&
+                    (color.length == 6) ? color : arguments.callee(color);
+            })('');
+        }
+        $(function () {
+            // 发送按钮事件
+            $('.send').click(() => {
+                // 获取输入框的值
+                let val = $('.content').val();
+                if (val == '') return alert('请输入要发送的弹幕')
+                // if(val && val.length > 15) return alert('最大可输入15个字')
+                // 输入完后清空输入框
+                $('.content').val('');
+                // 创建弹幕dom结构,并赋予输入框的值
+                $dmContent = $('<div class="text">' + val + '</div>');
+                // 获取弹幕父盒子
+                $screen = $(document.getElementById('screen'));
+                // 设置弹幕出现时的上边距
+                let top = Math.random() * $screen.height() + 40;
+                // 设置每条弹幕的上、左 边距
+                $dmContent.css({
+                    top: top + 'px',
+                    left: 164,
+                    bottom: 80,
+                    'z-index':99,
+                    'color':getRandomColor(),
+                    'font-weight':800
+                })
+                // $dmContent.css('z-index', 99);
+                // $dmContent.css('color',getRandomColor());
+                // $dmContent.css('font-weight',800);
+                // 把弹幕添加到弹幕父盒子中
+                $('.dm_box').append($dmContent);
+                // 弹幕移动方向以及存在时间，时间结束删除
+                $dmContent.animate({
+                    left: $screen.width() + 80 - $dmContent.width()
+                }, 10000, 'linear', function () {
+                    $(this).remove()
+                })
+            })
+        })
+        // 清屏按钮事件
+        $('.clear').click(() => {
+            $('.dm_box').empty()
+        })
+
+        $(".content").bind('input propertychange', function () {
+            let val = $(".content").val();
+            if (val && val.length > 15) return alert('最大可输入15个字')
+        })
+
+        let $video = document.getElementById('video');
+        // 监听视频是否开始播放
+        $video.addEventListener('play', function (e) {
+            console.log('开始播放', e);
+            if (e.type === 'play') {
+                $btns = $(document.getElementsByClassName('edit'))
+                $btns.css('display', 'block')
+            }
+        })
+        // $video.addEventListener('pause', function (e) {
+        //     console.log("暂停播放", e);
+        // });
+
+        let flag = false;
+        // 监听键盘按空格 控制视频播放暂停
+        document.onkeyup = function (e) {
+            // console.log(event,'event');
+            if (e && e.keyCode === 32) { // 播放
+                flag = !flag;
+                if (flag) {
+                    $video.play();
+                } else {
+                    $video.pause();
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
